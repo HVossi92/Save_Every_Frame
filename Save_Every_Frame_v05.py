@@ -46,9 +46,27 @@ def main():
             
     fps = doc.GetFps() 
     
+    ###
+    helpMessage = """Enter the first frame, enter the second frame. (There is an extra pop up window for the first and last frame, respectively.)
+
+Now the Script will run and automatically set your 'Setting, Frame-Range' to 'Current Frame'.
+
+Sets yor 'Preferences, Texture Paths' to your working Directory (The Directory of your current C4D working File).
+
+Checks if a 'Render' Folder exists in the same Directory, and creates it if necessary.
+
+Checks if a Folder inside 'Render' with the name of your current C4D File exists and then create an incremented Folder.
+
+Saves a new C4D File inside this Folder for every Frame."""
+###
+
     #Get User Framerange input   
-    startFrameIn = c4d.gui.InputDialog("Start Frame")
-    endFrameIn = c4d.gui.InputDialog("End Frame")
+    startFrameIn = c4d.gui.InputDialog("Enter Start Frame - or type 'help'")
+    if startFrameIn.lower() == "help":
+        c4d.gui.MessageDialog(helpMessage)
+    endFrameIn = c4d.gui.InputDialog("Enter End Frame - or type 'help'")
+    if endFrameIn.lower() == "help":
+        c4d.gui.MessageDialog(helpMessage)
     
     #Check User Input
     if not startFrameIn or not endFrameIn: #Is there any User Onput?
