@@ -2,6 +2,9 @@ import c4d, os
 from c4d import gui 
 from c4d import documents, plugins
 
+ID_OCTANE_LIVEPLUGIN = 1029499
+ID_OCTANE_VIDEOPOST_RENDERER = 1029525
+ID_OCTANE_VIDEOPOST = 1005172
 
 #Function to set 'Render Settings - Frame Range' to 'Current Frame'
 
@@ -89,8 +92,11 @@ Saves a new C4D File inside this Folder for every Frame."""
     Time = c4d.BaseTime(frame,fps)
     doc.SetTime(Time)
     c4d.EventAdd()
-
-    
+    rDat = doc.GetActiveRenderData()
+    octane = rDat.GetFirstVideoPost()
+    rDatIncr = rDat[c4d.RDATA_PATH]
+    rOctIncr = octane[c4d.SET_PASSES_SAVEPATH]
+    print(rOctIncr)
     rvalue = True
     folderExists = False
 
@@ -105,26 +111,32 @@ Saves a new C4D File inside this Folder for every Frame."""
                 folderExists = True
             if increment > 500: #To prevent infinite loop if something goes wrong
                 rvalue = gui.QuestionDialog("A Folder with the name " + DocName + " already exists. Overwirte frames with the same name? This message appears, if more than 500 Folder exist inside the Render Folder.")
-                break              
+                break    
                 
     if rvalue:
         if startFrame <= endFrame: # Loop from StartFrame to EndFrame
             for curFrame in xrange(startFrame, endFrame+1):
-                CreateC4DDocs(DocPath, DocNameShort, curFrame)    
+                CreateC4DDocs(DocPath, DocNameShort, curFrame, rDat, rDatIncr, rOctIncr, octane)    
         else: # Loop from EndFrame to StartFrame
             for curFrame in xrange(startFrame, endFrame-1, -1):
                 print(curFrame)
-                CreateC4DDocs(DocPath, DocNameShort, curFrame, False)   
+                CreateC4DDocs(DocPath, DocNameShort, curFrame, rDat, rDatIncr, rOctIncr, octane, False)   
     else:
         exit = gui.MessageDialog("Please save the project with a different name, or choose a new frame range")
 
-def CreateC4DDocs(DocPath, DocNameShort, curFrame, forward = True):
-    saveAs = DocPath + "\\" + DocNameShort + "_r" + str(curFrame) + ".c4d"       
-
+def CreateC4DDocs(DocPath, DocNameShort, curFrame, rDat, rDatIncr, rOctIncr, octane, forward = True):
+    saveAs = DocPath + "\\" + DocNameShort + "_r" + str(curFrame) + ".c4d"     
 
     #Save every Frame Functionality------------------------------------------------------
+    
+    #Change RenderPath
+    rDatIncr += "_r" + str(curFrame)
+    rOctIncr += "_r" + str(curFrame)
+    rDat[c4d.RDATA_PATH] = rDatIncr
+    octane[c4d.SET_PASSES_SAVEPATH] = rOctIncr
+    c4d.EventAdd()
 
-    c4d.documents.SaveDocument(doc, saveAs, c4d.SAVEDOCUMENTFLAGS_0, c4d.FORMAT_C4DEXPORT)
+    c4d.documents.SaveDocument(doc, saveAs, c4d.SAVEDOCUMENTFLAGS_0, c4d.FORMAT_C4DEXPORT)  
 
     #FrameForward
     if forward:
