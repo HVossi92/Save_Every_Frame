@@ -25,13 +25,14 @@ def setCurrentFrame():
         return plugins.FindPlugin(id, c4d.PLUGINTYPE_PREFS)
 
     renderdata()[c4d.RDATA_FRAMESEQUENCE]=1
-    
+
+# Set Texture Path    
 def setTexturesPaths():    
-    path1 = c4d.GetGlobalTexturePath(0)
+    path1 = c4d.GetGlobalTexturePath(9)
     ActiveDocument = documents.GetActiveDocument()
     texPath = ActiveDocument.GetDocumentPath()
     if not path1:
-        c4d.SetGlobalTexturePath(0, texPath)
+        c4d.SetGlobalTexturePath(9, texPath)
 
 #Main Function, this gets executed on start
 def main():
@@ -95,8 +96,13 @@ Saves a new C4D File inside this Folder for every Frame."""
     rDat = doc.GetActiveRenderData()
     octane = rDat.GetFirstVideoPost()
     rDatIncr = rDat[c4d.RDATA_PATH]
-    rOctIncr = octane[c4d.SET_PASSES_SAVEPATH]
-    print(rOctIncr)
+    
+    try: #If the user didn't choose the Octane Renderer, python can't find this setting
+        rOctIncr = octane[c4d.SET_PASSES_SAVEPATH]
+    except TypeError:
+        rOctIncr = None
+        print("Octane Renderer not selected")
+        
     rvalue = True
     folderExists = False
 
@@ -119,8 +125,8 @@ Saves a new C4D File inside this Folder for every Frame."""
                 CreateC4DDocs(DocPath, DocNameShort, curFrame, rDat, rDatIncr, rOctIncr, octane)    
         else: # Loop from EndFrame to StartFrame
             for curFrame in xrange(startFrame, endFrame-1, -1):
-                print(curFrame)
                 CreateC4DDocs(DocPath, DocNameShort, curFrame, rDat, rDatIncr, rOctIncr, octane, False)   
+        rDat[c4d.RDATA_PATH] = rDatIncr # After the loop, reset the Save File Name back to the original value, for the original C4D File
     else:
         exit = gui.MessageDialog("Please save the project with a different name, or choose a new frame range")
 
@@ -131,9 +137,12 @@ def CreateC4DDocs(DocPath, DocNameShort, curFrame, rDat, rDatIncr, rOctIncr, oct
     
     #Change RenderPath
     rDatIncr += "_r" + str(curFrame)
-    rOctIncr += "_r" + str(curFrame)
-    rDat[c4d.RDATA_PATH] = rDatIncr
-    octane[c4d.SET_PASSES_SAVEPATH] = rOctIncr
+    
+    if not rOctIncr == None: # Only execute if Octane Renderer is set
+        rOctIncr += "_r" + str(curFrame)
+        octane[c4d.SET_PASSES_SAVEPATH] = rOctIncr
+        
+    rDat[c4d.RDATA_PATH] = rDatIncr    
     c4d.EventAdd()
 
     c4d.documents.SaveDocument(doc, saveAs, c4d.SAVEDOCUMENTFLAGS_0, c4d.FORMAT_C4DEXPORT)  

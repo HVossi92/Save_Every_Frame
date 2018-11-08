@@ -3,7 +3,7 @@ Set up:
 Put the Python Script and Tif FIle into your C4D Scripts Folder (Windows: C:\Program Files\MAXON\CINEMA 4D R18\library\scripts).
 Inside Cinema go to 'Script', 'User Scripts', 'Save_Every_Frame'.
 
-Enter the first frame, enter the second frame. (There is an extra pop up window for the first and last frame, respectively.)
+Enter the first frame, enter the last frame. (There is an extra pop up window for the first and last frame, respectively.)
 
 Now the Script will run and automatically set your 'Settings, Frame-Range' to 'Current Frame'.
 Sets yor 'Preferences, Texture Paths' to your working Directory (The Directory of your current C4D working File).
